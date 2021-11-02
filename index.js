@@ -2,6 +2,9 @@ const express = require('express')
 const session = require('express-session')
 const bodyParser = require('body-parser')
 require('./utils/db.config')
+const passport = require('passport')
+require('./utils/authStategies/localStrategy')
+
 
 const authRoutes = require('./routes/authRoutes')
 const app = express()
@@ -13,6 +16,9 @@ app.use(session({
   saveUninitialized: true,
   cookie: { secure: false }
 }))
+
+app.use(passport.initialize())
+app.use(passport.session())
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.set('view engine', 'ejs')
