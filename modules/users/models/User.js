@@ -31,12 +31,17 @@ const userShema = mongoose.Schema({
     timestamps: true
 })
 
-userShema.pre('save', async function(next) {  
+userShema.pre('save', async function(next) {
   if(!this.isModified('password')) next()
 
   this.password = await bcrypt.hash(this.password, 10)
   next()
 })
+
+userShema.methods.checkPassword = async function(password) {
+  const result = await bcrypt.compare(password, this.password)
+  return result
+}
 
 const User = mongoose.model('users', userShema)
 

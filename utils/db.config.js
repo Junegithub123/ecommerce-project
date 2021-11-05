@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 mongoose.connect('mongodb+srv://june:altd@cluster0.wmh8a.mongodb.net/x-store', {
+ //mongoose.connect('mongodb://localhost:27017/x-store', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
@@ -7,3 +8,6 @@ mongoose.connect('mongodb+srv://june:altd@cluster0.wmh8a.mongodb.net/x-store', {
 mongoose.connection.once('open', () => {
   console.log('Connected to MongoDB')
 })
+
+
+module.exports = mongoose.connection

@@ -1,17 +1,18 @@
 const passport = require('passport')
-const   LocalStrategy = require('passport-local').Strategy;
+const LocalStrategy = require('passport-local').Strategy;
 const User = require('../../modules/users/models/User')
 
 
 passport.use(new LocalStrategy({
   usernameField: 'email'
-},
-async (email, password, done) => {
+}, async (email, password, done) => {
   try {
     const user = await User.findOne({ email })
-    return done(null, user)
+    if (!user) return done(null, false, { error: 'User not found' })
+    if (await user.checkPassword(password)) return done(null, user)
+    return done(null, false, { error: 'Incorrect password' })
   } catch (e) {
-    done(e)
+    return done(e)
   }
 }))
 
