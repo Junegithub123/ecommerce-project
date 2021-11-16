@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 
 
-const userShema = mongoose.Schema({
+const userSchema = mongoose.Schema({
     name: {
         type: String,
         required: [true, 'Name is required'],
@@ -31,18 +31,29 @@ const userShema = mongoose.Schema({
     timestamps: true
 })
 
-userShema.pre('save', async function(next) {
+/**
+ * Validates unique email
+ */
+ userSchema.path('email').validate(async (email) => {
+  const emailCount = await mongoose.models.users.countDocuments({ email })
+  return !emailCount
+}, 'Email already exists')
+
+/**
+ * Encrypts password if value is changed
+ */
+ userSchema.pre('save', async function(next) {
   if(!this.isModified('password')) next()
 
   this.password = await bcrypt.hash(this.password, 10)
   next()
 })
 
-userShema.methods.checkPassword = async function(password) {
+userSchema.methods.checkPassword = async function(password) {
   const result = await bcrypt.compare(password, this.password)
   return result
 }
 
-const User = mongoose.model('users', userShema)
+const User = mongoose.model('users', userSchema)
 
 module.exports = User
