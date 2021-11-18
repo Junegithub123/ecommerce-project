@@ -37,48 +37,42 @@ describe('Make sure register fails on no data', () => {
 
 describe('Make sure register is successfull with valid data', () => {
   const email = `john.${new Date().getTime()}@example.com`
-  it('should return Sucess in response', (done) => {
-      chai.request(app)
-      const agent = chai.request.agent(app)
-      agent
-        .post('/register')
-        .type('form')
-        .send({
-          email,
-          name: 'John Doe',
-          password: '12345678',
-          repeat_password: '12345678'
-        })
-        .end((err, res) => {
-          //res.should.have.status(400)
-          if (err) return done(err)
-          res.should.have.status(200)
-          res.text.should.not.contain('Validation Errors')
-          //res.body.should.be.a('object')
-          done()
-        })
-    })
+  it('should return success in respones', (done) => {
+    const agent = chai.request.agent(app)
+    agent
+      .post('/register')
+      .type('form')
+      .send({
+        email,
+        name: 'John Doe',
+        password: '12345678',
+        repeat_password: '12345678'
+      })
+      .end((err, res) => {
+        if (err) return done(err)
+        res.should.have.status(200)
+        res.text.should.not.contain('Validation Errors')
+        done()
+      })
+  })
 
-    it('should return validation error about unique email', (done) => {
-      chai.request(app)
-      const agent = chai.request.agent(app)
-      agent
-        .post('/register')
-        .type('form')
-        .send({
-          email,
-          name: 'John Doe',
-          password: '12345678',
-          repeat_password: '12345678'
-        })
-        .end((err, res) => {
-          //res.should.have.status(400)
-          if (err) return done(err)
-          res.should.have.status(200)
-          res.text.should.contain('Email already exists')
-          res.text.should.not.contain('Validation Errors')
-          //res.body.should.be.a('object')
-          done()
-        })
-    })
+  it('should return validation error about unique email', (done) => {
+    const agent = chai.request.agent(app)
+    agent
+      .post('/register')
+      .type('form')
+      .send({
+        email,
+        name: 'John Doe',
+        password: '12345678',
+        repeat_password: '12345678'
+      })
+      .end((err, res) => {
+        if (err) return done(err)
+        res.should.have.status(200)
+        res.text.should.contain('Email already exists')
+        res.text.should.contain('Validation Errors')
+        done()
+      })
+  })
 })

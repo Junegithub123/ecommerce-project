@@ -9,13 +9,15 @@ const mongoDbConnection = require('./utils/db.config')
 const passport = require('passport')
 require('./utils/authStategies/localStrategy')
 const authMiddleware = require('./middlewares/authMiddleware')
+const flasherMiddleware = require('./middlewares/flasherMiddleware')
 const authRoutes = require('./routes/authRoutes')
 //const { config } = require('chai')
 const app = express()
 const config = require('./utils/config')
 
 app.use(bodyParser.urlencoded({ extended: false }))
-app.set('view engine', 'ejs')
+app.set('view engine', 'pug')
+//app.set('view engine', 'ejs')
 // app.set('trust proxy', 1)
 app.use(session({
   secret: '788a154e2a8d07c4cafdee4a7d6dff2d90ab2586',
@@ -27,24 +29,41 @@ app.use(session({
   })
   //store: new MongoStore({ mongooseConnection: mongoDbConnection })
 }))
-app.use(passport.initialize())
-app.use(passport.session())
+
 app.use(express.static('public'))
 app.use(logger('dev'))
-app.locals.message = {}
-app.locals.formData = {}
-app.locals.errors = {}
+app.use(passport.initialize())
+app.use(passport.session())
+
+/**
+ * Global middleware to make logged in user available to the views
+ */
+ app.use((req, res, next) => {
+  res.locals.user = req.isAuthenticated() ? req.user : null
+  return next()
+})
+
+/**
+ * App level locals
+ */
+ app.locals.message = {} // Used in displaying alert
+ app.locals.formData = {} // For prefilling data on form validation
+ app.locals.errors = {} // Form validation errors
 
 app.use('/', authRoutes)
 
-// app.get('/', authMiddleware, (req, res) => {
-  app.get('/', (req, res) => {
-  console.log('User:', req.user)
+app.get('/', flasherMiddleware, (req, res) => {
   return res.render('index')
 })
 
+// app.get('/', authMiddleware, (req, res) => {
+//   app.get('/', (req, res) => {
+//   console.log('User:', req.user)
+//   return res.render('index')
+// })
+
 app.get('/homepage', authMiddleware, (req, res) => {
-  res.send(`welcome ${req.user.name}`)
+  return res.render('dashboard')
 })
 
 app.use((req, res, next) => {
