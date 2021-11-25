@@ -6,6 +6,7 @@
   "scripts": {
     "serve:local": "nodemon index.js",
     "test": "mocha tests/*.js --exit",
+    "test:chrome": "node test_browser/index.js",
     "lint": "eslint ./*.js",
     "lint:fix": "eslint --fix ./*.js"
   },
@@ -41,6 +42,7 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "mocha": "^7.1.1",
-    "nodemon": "^2.0.2"
+    "nodemon": "^2.0.2",
+    "puppeteer-core": "^3.3.0"
   }
 }

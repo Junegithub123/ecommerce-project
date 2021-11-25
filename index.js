@@ -11,6 +11,7 @@ require('./utils/authStategies/localStrategy')
 const authMiddleware = require('./middlewares/authMiddleware')
 const flasherMiddleware = require('./middlewares/flasherMiddleware')
 const authRoutes = require('./routes/authRoutes')
+const categoryRoutes = require('./routes/categoryRoutes')
 //const { config } = require('chai')
 const app = express()
 const config = require('./utils/config')
@@ -46,14 +47,16 @@ app.use(passport.session())
 /**
  * App level locals
  */
+ app.locals.title = 'X Store'
  app.locals.message = {} // Used in displaying alert
  app.locals.formData = {} // For prefilling data on form validation
  app.locals.errors = {} // Form validation errors
 
 app.use('/', authRoutes)
+app.use('/', categoryRoutes)
 
 app.get('/', flasherMiddleware, (req, res) => {
-  return res.render('index')
+  return res.render('pages/homepage')
 })
 
 // app.get('/', authMiddleware, (req, res) => {
@@ -62,12 +65,12 @@ app.get('/', flasherMiddleware, (req, res) => {
 //   return res.render('index')
 // })
 
-app.get('/homepage', authMiddleware, (req, res) => {
-  return res.render('dashboard')
+app.get('/dashboard', authMiddleware, (req, res) => {
+  return res.render('dashboard/dashboard')
 })
 
 app.use((req, res, next) => {
-  res.status(404).render("404")
+  res.status(404).render("pages/404")
 })
 
 app.listen(config.port, () => {

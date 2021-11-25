@@ -1,3 +1,7 @@
+/**
+ * This middleware used for echoing conent on the page
+ */
+
 const flashMiddleware = (req, res, next) => {
   if (req.method === 'GET') {
     if(req.session.flashData) {
@@ -7,7 +11,7 @@ const flashMiddleware = (req, res, next) => {
       req.session.flashData = null
     }
   }
-  next()
+  return next()
 }
 
 
