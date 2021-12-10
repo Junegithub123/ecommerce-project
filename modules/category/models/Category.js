@@ -1,16 +1,5 @@
 const mongoose = require('mongoose')
 
-const choicesSchema = {
-  label: {
-    type: String,
-    required: true
-  },
-  value: {
-    type: mongoose.Schema.Types.Mixed,
-    required: true
-  }
-}
-
 const categorySchema = mongoose.Schema({
   /**
    * OPTIONAL: Parent category id
@@ -20,8 +9,8 @@ const categorySchema = mongoose.Schema({
   categoryId: {
     type: mongoose.Types.ObjectId,
     ref: 'Category',
-    index:  true,
-    sparse: true // Required with optional unique index
+    index: true,
+    sparse: true // Required with optional index
   },
 
   /**
@@ -75,75 +64,8 @@ const categorySchema = mongoose.Schema({
    * OPTIONAL: Properties that applies to this category
    */
   properties: [{
-    /**
-     * Is it required on product
-     */
-    required: {
-      type: Boolean
-    },
-
-    /**
-     * Property name like RAM, Storage
-     */
-    name: {
-      type: String,
-      required: true
-    },
-
-    /**
-     * Only filterable properties will show in the list
-     */
-    filterable: {
-      type: Boolean,
-      default: false
-    },
-
-    /**
-     * Optional
-     * Possible choices for filter like 1GB, 2GB
-     */
-    filterChoices: [choicesSchema],
-
-    /**
-     * Input Type
-     */
-    input: {
-      type: {
-        type: String,
-
-        /**
-         * What kind of input is shown to product detail input
-         */
-        enum: [
-          'fractionalNumber', // Numbers with decimal points
-          'completeNumber', // Numbers without decimal points
-          'textOneline', // One line of text
-          'textMultiline', // Paragraph line of text
-          'selectOne', // Dropdown with abitlity to select one
-          'selectMultiple' // Dropdown with abiltiy to select multiple
-        ]
-      },
-
-      /**
-       * When input type is select, this array is used to generate dropdown
-       */
-      propertyChoices: [choicesSchema]
-    },
-
-    /**
-     * Applied unit to this category
-     * In case of storage it can be MB, GB, TB, etc
-     * [{ label: "KB", threshold: 1024, nextLabel: "MB"},
-     * { label: "MB", threshold: 1024, nextLabel: "GB"},
-     * { label: "GB", threshold: 1024, nextLabel: "TB"},
-     * { label: "TB", threshold: 1024, nextLabel: "PB"}]
-     */
-    units: [{
-      label: String, // GB,
-      printLabel: String, // This will be printed on invoice
-      threshold: Number, // 1024
-      nextLabel: String
-    }]
+    ref: 'Property',
+    type: mongoose.Types.ObjectId
   }],
 
   /**
@@ -162,6 +84,22 @@ const categorySchema = mongoose.Schema({
   }
 }, {
   timestamps: true
+})
+
+categorySchema.pre('save', function (next) {
+  const errors = {}
+  for (let i = 0; i < this.properties.length; i++) {
+    const property = this.properties[i]
+    if (property.filterable && !['selectOne', 'selectMultiple'].includes(property.input.type)) {
+      if (!property.filterChoices.length) {
+        errors[`properties[${i}].filterChoices`] = 'Filter choices must contain at least 1 item'
+      }
+    }
+  }
+  if (Object.keys(errors).length) {
+    return next(errors)
+  }
+  return next()
 })
 
 const Category = mongoose.model('Category', categorySchema)

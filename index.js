@@ -12,11 +12,15 @@ const authMiddleware = require('./middlewares/authMiddleware')
 const flasherMiddleware = require('./middlewares/flasherMiddleware')
 const authRoutes = require('./routes/authRoutes')
 const categoryRoutes = require('./routes/categoryRoutes')
+const categoryApiRoutes = require('./routes/api/categoryRoutes')
 //const { config } = require('chai')
 const app = express()
 const config = require('./utils/config')
+// const { trimObject, santizeObject } = require('./utils/global')
+const { trimAndSantizeObject } = require('./utils/global')
 
 app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
 app.set('view engine', 'pug')
 //app.set('view engine', 'ejs')
 // app.set('trust proxy', 1)
@@ -35,12 +39,20 @@ app.use(express.static('public'))
 app.use(logger('dev'))
 app.use(passport.initialize())
 app.use(passport.session())
+app.use((req, res, next) => {
+  // trimObject(req.body)
+  // santizeObject(req.body)
+  trimAndSantizeObject(req.body)
+  return next()
+})
 
 /**
  * Global middleware to make logged in user available to the views
  */
  app.use((req, res, next) => {
+  res.locals.assetUrl = config.assetUrl
   res.locals.user = req.isAuthenticated() ? req.user : null
+  app.locals.pretty = process.env.NODE_ENV !== 'production' // pretty output
   return next()
 })
 
@@ -54,6 +66,8 @@ app.use(passport.session())
 
 app.use('/', authRoutes)
 app.use('/', categoryRoutes)
+app.use('/api/v1/category', categoryApiRoutes)
+
 
 app.get('/', flasherMiddleware, (req, res) => {
   return res.render('pages/homepage')

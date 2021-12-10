@@ -6,6 +6,8 @@ const config = require('./config')
 //   useUnifiedTopology: true
 // })
 
+mongoose.set('debug', process.env.NODE_ENV !== 'production')
+
 mongoose.connect(config.mongoUrl, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
